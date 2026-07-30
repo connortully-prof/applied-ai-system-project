@@ -1,0 +1,22 @@
+flowchart LR
+    User[Pet Owner]
+    Web[Web App / Dashboard]
+    API[FastAPI Backend]
+    Auth[Authentication Service]
+    DB[(PostgreSQL Database)]
+    AI[AI Pet Care Recommendation Engine]
+    Reminders[Medication & Care Reminders]
+    Insights[Health Insights & Trends]
+    Vet[Veterinary Guidance Layer]
+
+    User --> Web
+    Web --> API
+    API --> Auth
+    API --> DB
+    API --> AI
+    API --> Reminders
+    API --> Insights
+    AI --> Vet
+    Reminders --> User
+    Insights --> User
+    Vet --> API
