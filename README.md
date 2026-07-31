@@ -1,82 +1,172 @@
 # PawPal AI Pet Care Assistant
 
-PawPal is a lightweight AI-powered pet care assistant built to help owners with common health, wellness, and care questions. It uses a retrieval-augmented generation (RAG) approach: before answering, it retrieves relevant pet-care guidance from a local knowledge base and incorporates that information into the response.
+## Original Project Context
 
-## AI Feature Included
+This project is the evolved version of my original Module 1–3 PawPal project. In that earlier work, I built a pet-care assistant concept focused on helping owners understand common symptoms, wellness patterns, and safe next steps for their animals. The original goal was to combine basic AI support with practical pet health guidance in a way that felt useful, accessible, and cautious rather than overly confident.
 
-This project includes a Retrieval-Augmented Generation (RAG) workflow:
+## Title and Summary
 
-- It retrieves relevant pet-care guidance from a local knowledge base.
-- It filters out non-pet requests with a safety guardrail.
-- It uses the retrieved context to produce safer, more useful advice.
-- It logs activity and fails gracefully if an error occurs.
+PawPal is a lightweight AI-powered pet care assistant designed to help owners ask practical questions about pet symptoms, wellness, diet, and treatment caution. It matters because pet owners often need quick, safe guidance during uncertain moments, and AI can support that decision-making process when paired with retrieval, guardrails, and clear fallback behavior.
+
+The system is intentionally narrow and safety-oriented: it focuses on pet-health support, retrieves relevant care guidance from a local knowledge base, and refuses to answer unrelated or unsafe requests. This reduces hallucination risk and keeps the assistant useful without pretending to replace veterinary care.
+
+## Architecture Overview
+
+The system follows a simple retrieval-augmented generation (RAG) workflow:
+
+1. The user asks a pet-related question.
+2. A guardrail checks whether the request is actually about pet care.
+3. The retriever searches a local pet-care knowledge base for relevant guidance.
+4. The AI agent reasons using that retrieved context before producing an answer.
+5. The result is shown to the user and validated by basic automated checks and human review.
+
+The Mermaid source for the architecture is in [diagrams/architecture.mmd](diagrams/architecture.mmd). It shows the flow from user input to retrieval, reasoning, output, and testing review.
 
 ## Project Structure
 
-- `app.py` — command-line interface for the assistant
-- `pawpal/` — main application package
-- `data/pet_care_knowledge.txt` — veterinary-style knowledge base
-- `diagrams/architecture.mmd` — Mermaid architecture diagram
-- `assets/` — architecture/export assets
-- `tests/` — validation tests
+- [app.py](app.py) — command-line interface for the assistant
+- [pawpal/rag.py](pawpal/rag.py) — retrieval and response logic
+- [pawpal/__init__.py](pawpal/__init__.py) — package exports
+- [data/pet_care_knowledge.txt](data/pet_care_knowledge.txt) — pet-care knowledge base
+- [diagrams/architecture.mmd](diagrams/architecture.mmd) — Mermaid architecture diagram
+- [tests/test_rag.py](tests/test_rag.py) — validation tests
+- [requirements.txt](requirements.txt) — Python dependencies
 
-## Setup
+## Setup Instructions
 
-1. Open a terminal in the project folder.
-2. Create a virtual environment:
+### 1. Clone the repo
 
-   ```bash
-   python -m venv .venv
-   ```
+```bash
+git clone https://github.com/connortully-prof/applied-ai-system-project.git
+cd applied-ai-system-project
+```
 
-3. Activate the environment:
+### 2. Create a virtual environment
 
-   On Windows PowerShell:
+On Windows PowerShell:
 
-   ```powershell
-   .\.venv\Scripts\Activate.ps1
-   ```
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
 
-   On macOS/Linux:
+On macOS/Linux:
 
-   ```bash
-   source .venv/bin/activate
-   ```
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
 
-4. Install dependencies:
+### 3. Install dependencies
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+pip install -r requirements.txt
+```
 
-5. Run the app:
+### 4. Run the app
 
-   ```bash
-   python app.py
-   ```
+```bash
+python app.py
+```
 
-6. Example prompts:
+You can also pass a query directly:
 
-   ```text
-   My dog has a fever and seems weak. What should I do?
-   My cat is not eating and seems tired.
-   How do I switch my pet to a new food?
-   ```
+```bash
+python app.py "My dog has a fever and seems weak. What should I do?"
+```
 
-## Testing
+### 5. Run tests
 
 ```bash
 python -m pytest -q
 ```
 
-## Safety and Logging
+## Sample Interactions
 
-- Non-pet questions are rejected with a clear guardrail.
-- User requests and errors are logged in the application logger.
-- The system returns a safe fallback if it cannot answer reliably.
+### Example 1: Urgent symptoms
 
-## Architecture
+Input:
 
-The Mermaid source file is in:
+```text
+My dog has a fever and seems weak. What should I do?
+```
 
-- `diagrams/architecture.mmd`
+Output:
+
+```text
+PawPal: Based on the retrieved pet care guidance, this situation needs prompt veterinary attention. If your pet has a fever, weakness, breathing trouble, collapse, or severe symptoms, contact an emergency vet immediately. Keep your pet calm, stop exercise, and avoid giving human medication without veterinary advice.
+```
+
+### Example 2: Wellness question
+
+Input:
+
+```text
+My cat is not eating and seems tired.
+```
+
+Output:
+
+```text
+PawPal: Based on the retrieved pet care guidance, start with the safest next steps: monitor symptoms closely, maintain hydration, avoid sudden diet changes, and contact a vet if the issue persists or worsens.
+```
+
+### Example 3: Non-pet query safety check
+
+Input:
+
+```text
+How do I fix my car engine?
+```
+
+Output:
+
+```text
+This assistant is designed for pet care guidance only. Please ask about a dog, cat, or other pet health issue.
+```
+
+These examples demonstrate that the app is active, purpose-aware, and designed to support pet-specific decision-making instead of making generic or unsafe claims.
+
+## Design Decisions
+
+I built PawPal as a small, local, retrieval-based system rather than a large external API-driven chatbot because it keeps the project reproducible, understandable, and controllable. The design makes the system easier to run in a portfolio or classroom environment, while still demonstrating a genuine AI workflow: retrieve context, apply guardrails, and generate a safer answer.
+
+### Trade-offs
+
+- Strength: the system is transparent and easy to test.
+- Strength: the knowledge base is local and easy to inspect or revise.
+- Trade-off: it uses a lightweight, static knowledge set rather than a full production veterinary database.
+- Trade-off: the assistant is intentionally conservative and avoids overconfident recommendations in medical situations.
+
+This is a deliberate choice: for a pet-health assistant, reliability and safety matter more than being overly broad or conversational.
+
+## Testing Summary
+
+I implemented a simple test suite to validate the most important behaviors of the assistant. The tests confirm that:
+
+- pet-care queries generate a meaningful answer,
+- non-pet requests are blocked by a guardrail,
+- the system remains lightweight and reproducible.
+
+### What worked
+
+- The retrieval flow produced answers grounded in relevant pet-care guidance.
+- The guardrail prevented unrelated prompts from being processed.
+- The CLI interface worked in interactive mode and in one-shot command-line mode.
+
+### What did not work initially
+
+- The first version of the CLI crashed when no input was provided in a non-interactive session because it used `input()` without handling EOF.
+- The project started without a proper package structure, which caused import errors until the application was organized correctly.
+
+### What I learned
+
+This project reinforced that a useful AI system is not just about model output; it is about data flow, system design, verification, and safety. A strong AI project includes a clear way to retrieve facts, a way to check whether the request is appropriate, and a way to test the system before claiming it works.
+
+## Key Takeaways
+
+This project taught me that AI is most useful when it is constrained to a clear problem and grounded in reliable information. In practical terms, I learned how important it is to design around validation, guardrails, and transparency rather than assuming a model will always produce safe or correct answers.
+
+## Final Notes
+
+PawPal is a focused example of a practical AI application: narrow scope, retrieval-based reasoning, and explicit safety checks. It is a strong portfolio project because it demonstrates software engineering, AI application design, and responsible behavior in a real-world domain.
