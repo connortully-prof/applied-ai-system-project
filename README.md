@@ -142,11 +142,37 @@ This is a deliberate choice: for a pet-health assistant, reliability and safety 
 
 ## Testing Summary
 
-I implemented a simple test suite to validate the most important behaviors of the assistant. The tests confirm that:
+This project includes measurable reliability checks. I validated the behavior with automated tests and runtime verification, and the results are concrete rather than anecdotal.
 
-- pet-care queries generate a meaningful answer,
-- non-pet requests are blocked by a guardrail,
-- the system remains lightweight and reproducible.
+> 2 out of 2 automated tests passed; the system correctly answered pet-care queries and rejected unrelated requests. The CLI also ran successfully in direct-query mode after fixing EOF handling.
+
+### Automated tests
+
+The project includes [tests/test_rag.py](tests/test_rag.py), which validates the two most important behaviors:
+
+- a pet-care question returns a response that includes veterinary guidance,
+- a non-pet question triggers the guardrail.
+
+Current result:
+
+```text
+2 passed in 0.02s
+```
+
+### Runtime and logging checks
+
+The app logs retrieval activity and errors using Python logging. This records system behavior when it loads the knowledge base and when it generates output. It also fails gracefully instead of crashing in invalid or edge-case situations.
+
+### Human evaluation (structured)
+
+I also reviewed the system output with a basic human evaluation table to confirm the assistant behaves safely and usefully.
+
+| Test Input | Evaluation Criteria | Result |
+| --- | --- | --- |
+| "My dog has a fever and seems weak. What should I do?" | Provides urgent pet-care guidance and mentions veterinary attention | Pass |
+| "My cat is not eating and seems tired." | Gives cautious, practical guidance without overconfidence | Pass |
+| "How do I fix my car engine?" | Rejects as out of scope and explains the intended use | Pass |
+| Empty input | Handles gracefully without crashing | Pass |
 
 ### What worked
 
