@@ -1,22 +1,31 @@
 flowchart LR
-    User[Pet Owner]
-    Web[Web App / Dashboard]
-    API[FastAPI Backend]
-    Auth[Authentication Service]
-    DB[(PostgreSQL Database)]
-    AI[AI Pet Care Recommendation Engine]
-    Reminders[Medication & Care Reminders]
-    Insights[Health Insights & Trends]
-    Vet[Veterinary Guidance Layer]
+    User[Pet Owner / User Input]
+    Query[Pet care question or symptom report]
+    Retriever[Retriever\nLooks up relevant pet-care guidance]
+    Guardrail[Guardrail\nRejects non-pet requests]
+    Agent[AI Agent\nUses retrieved context to reason]
+    Knowledge[(Knowledge Base\npet care guidance)]
+    Output[Safely generated advice\nfor pet health and care]
+    Tester[Test Script\npytest checks behavior]
+    Human[Human Review\nVet or owner validates answer]
 
-    User --> Web
-    Web --> API
-    API --> Auth
-    API --> DB
-    API --> AI
-    API --> Reminders
-    API --> Insights
-    AI --> Vet
-    Reminders --> User
-    Insights --> User
-    Vet --> API
+    User --> Query
+    Query --> Guardrail
+    Guardrail --> Retriever
+    Knowledge --> Retriever
+    Retriever --> Agent
+    Agent --> Output
+    Output --> Human
+    Output --> Tester
+    Tester --> Agent
+    Human -. feedback .-> Agent
+
+    classDef primary fill:#dbeafe,stroke:#1d4ed8,stroke-width:1px,color:#111827;
+    classDef process fill:#dcfce7,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef data fill:#fef3c7,stroke:#d97706,stroke-width:1px,color:#111827;
+    classDef review fill:#fce7f3,stroke:#db2777,stroke-width:1px,color:#111827;
+
+    class User,Query primary;
+    class Retriever,Guardrail,Agent process;
+    class Knowledge,Output data;
+    class Tester,Human review;
