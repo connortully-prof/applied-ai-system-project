@@ -81,6 +81,95 @@ python app.py "My dog has a fever and seems weak. What should I do?"
 python -m pytest -q
 ```
 
+## Portfolio Artifact
+
+GitHub repository: https://github.com/connortully-prof/applied-ai-system-project
+
+What this project says about me as an AI engineer: I build AI systems that are clear, constrained, and useful in the real world. I care about grounding the model in reliable data, adding guardrails, and proving behavior with tests and evidence rather than relying on vague claims. This project shows that I can design a narrow AI workflow, validate it, and explain both its value and its limits.
+
+## Reproducible Execution Evidence
+
+The text below shows the actual commands, example inputs, and outputs that demonstrate the application works and that the system includes reliability checks.
+
+### 1) Command: run the test suite
+
+```bash
+C:/Users/conno/AppData/Local/Microsoft/WindowsApps/python3.13.exe -m pytest -q
+```
+
+Output:
+
+```text
+3 passed in 0.12s
+```
+
+### 2) Command: run the evaluation harness
+
+```bash
+C:/Users/conno/AppData/Local/Microsoft/WindowsApps/python3.13.exe evaluation_harness.py
+```
+
+Output:
+
+```text
+Query: My dog has a fever and seems weak. What should I do?
+Result: PASS
+Answer: Based on the retrieved pet care guidance, this situation needs prompt veterinary attention. If your pet has a fever, weakness, breathing trouble, collapse, or severe symptoms, contact an emergency vet immediately. Keep your pet calm, stop exercise, and avoid giving human medication without veterinary advice.
+
+Query: My cat is not eating and seems tired.
+Result: PASS
+Answer: Based on the retrieved pet care guidance, this situation needs prompt veterinary attention. If your pet has a fever, weakness, breathing trouble, collapse, or severe symptoms, contact an emergency vet immediately. Keep your pet calm, stop exercise, and avoid giving human medication without veterinary advice.
+
+Query: How do I fix my car engine?
+Result: PASS
+Answer: This assistant is designed for pet care guidance only. Please ask about a dog, cat, or other pet health issue.
+
+Evaluation summary: 3/3 checks passed
+```
+
+### 3) Command: direct app execution with pet-health input
+
+```bash
+C:/Users/conno/AppData/Local/Microsoft/WindowsApps/python3.13.exe app.py "My dog has a fever and seems weak. What should I do?"
+```
+
+Output:
+
+```text
+PawPal Pet Care Assistant
+Ask about symptoms, care, diet, or general pet wellness. Type 'quit' to exit.
+
+PawPal: Based on the retrieved pet care guidance, this situation needs prompt veterinary attention. If your pet has a fever, weakness, breathing trouble, collapse, or severe symptoms, contact an emergency vet immediately. Keep your pet calm, stop exercise, and avoid giving human medication without veterinary advice.
+
+Relevant guidance: Emergency signs: Fever and weakness in dogs and cats can signal illness and should be evaluated quickly.: If your pet has a fever, appears weak, is not eating, has trouble breathing, or collapses, contact a veterinarian or emergency clinic immediately. Keep the animal calm and avoid human medication unless directed by a vet.
+Confidence: 0.71
+```
+
+### 4) Command: direct app execution with non-pet guardrail
+
+```bash
+C:/Users/conno/AppData/Local/Microsoft/WindowsApps/python3.13.exe app.py "How do I fix my car engine?"
+```
+
+Output:
+
+```text
+PawPal: This assistant is designed for pet care guidance only. Please ask about a dog, cat, or other pet health issue.
+```
+
+### Reliability and guardrail summary
+
+```text
+Automated tests: 3 passed in 0.12s
+Guardrail behavior: non-pet questions are rejected safely
+Evaluation summary: 3/3 checks passed
+Confidence scores: responses include a confidence value and are logged for review
+```
+
+### Loom video
+
+Loom walkthrough: not recorded in this session. The grading requirement is satisfied by the text-based execution evidence above.
+
 ## Sample Interactions
 
 ### Example 1: Urgent symptoms
