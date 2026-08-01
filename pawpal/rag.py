@@ -24,29 +24,36 @@ class KnowledgeEntry:
 class PawPalRAGSystem:
     """A lightweight retrieval-augmented pet care assistant."""
 
-    def __init__(self, knowledge_path: str | Path | None = None) -> None:
-        self.knowledge_path = Path(knowledge_path) if knowledge_path else Path(__file__).resolve().parents[1] / "data" / "pet_care_knowledge.txt"
+    def __init__(self, knowledge_path: str | Path | None = None, knowledge_sources: list[str | Path] | None = None) -> None:
+        default_path = Path(__file__).resolve().parents[1] / "data" / "pet_care_knowledge.txt"
+        sources = list(knowledge_sources) if knowledge_sources else []
+        if knowledge_path is not None:
+            sources.insert(0, knowledge_path)
+        if not sources:
+            sources = [default_path]
+
+        self.knowledge_paths = [Path(source) for source in sources]
         self.knowledge_base = self._load_knowledge_base()
 
     def _load_knowledge_base(self) -> list[KnowledgeEntry]:
-        if not self.knowledge_path.exists():
-            LOGGER.warning("Knowledge base not found at %s", self.knowledge_path)
-            return []
-
-        raw_text = self.knowledge_path.read_text(encoding="utf-8")
         chunks = []
+        for path in self.knowledge_paths:
+            if not path.exists():
+                LOGGER.warning("Knowledge base not found at %s", path)
+                continue
 
-        for block in raw_text.split("\n\n"):
-            block = block.strip()
-            if not block:
-                continue
-            lines = [line.strip() for line in block.splitlines() if line.strip()]
-            if not lines:
-                continue
-            title = lines[0]
-            body = " ".join(lines[1:]) if len(lines) > 1 else ""
-            keywords = tuple(sorted(set(re.findall(r"[a-zA-Z]+", (title + " " + body).lower()))))
-            chunks.append(KnowledgeEntry(title=title, content=body, keywords=keywords))
+            raw_text = path.read_text(encoding="utf-8")
+            for block in raw_text.split("\n\n"):
+                block = block.strip()
+                if not block:
+                    continue
+                lines = [line.strip() for line in block.splitlines() if line.strip()]
+                if not lines:
+                    continue
+                title = lines[0]
+                body = " ".join(lines[1:]) if len(lines) > 1 else ""
+                keywords = tuple(sorted(set(re.findall(r"[a-zA-Z]+", (title + " " + body).lower()))))
+                chunks.append(KnowledgeEntry(title=title, content=body, keywords=keywords))
 
         LOGGER.info("Loaded %s knowledge entries", len(chunks))
         return chunks
@@ -71,6 +78,19 @@ class PawPalRAGSystem:
         scored.sort(key=lambda item: item[0], reverse=True)
         return [entry for _, entry in scored[:limit]]
 
+    def _confidence_score(self, retrieved: list[KnowledgeEntry], query: str) -> float:
+        if not retrieved:
+            return 0.25
+
+        query_tokens = self._tokenize(query)
+        score = 0.0
+        for entry in retrieved:
+            overlap = len(query_tokens & set(entry.keywords))
+            score += overlap / max(1, len(query_tokens))
+
+        normalized = min(1.0, score / max(1, len(retrieved)))
+        return round(max(0.25, min(0.98, 0.55 + normalized * 0.43)), 2)
+
     def answer(self, user_query: str) -> str:
         if not user_query or not user_query.strip():
             LOGGER.warning("Empty user query received")
@@ -93,6 +113,7 @@ class PawPalRAGSystem:
                 relevant_entries = self.knowledge_base[:2]
 
             context = " ".join(f"{entry.title}: {entry.content}" for entry in relevant_entries)
+            confidence = self._confidence_score(relevant_entries, query)
 
             emergency_signals = [
                 "fever", "weak", "not eating", "breathing", "collapse", "vomiting",
@@ -114,11 +135,12 @@ class PawPalRAGSystem:
 
             answer_text = (
                 f"{response}\n\nRelevant guidance: {context}\n\n"
+                f"Confidence: {confidence:.2f}\n\n"
                 "If symptoms continue, worsen, or your pet seems unstable, schedule a veterinary exam promptly."
             )
-            LOGGER.info("Generated answer for query: %s", query)
+            LOGGER.info("Generated answer for query: %s | confidence=%.2f", query, confidence)
             return answer_text
-        except Exception as exc:  # pragma: no cover - safety net for runtime issues
+        except Exception:  # pragma: no cover - safety net for runtime issues
             LOGGER.exception("Failed to answer user query")
             return "I could not safely answer that request. Please rephrase the question and include your pet's symptoms or concern."
 

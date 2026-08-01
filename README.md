@@ -189,6 +189,14 @@ I also reviewed the system output with a basic human evaluation table to confirm
 
 This project reinforced that a useful AI system is not just about model output; it is about data flow, system design, verification, and safety. A strong AI project includes a clear way to retrieve facts, a way to check whether the request is appropriate, and a way to test the system before claiming it works.
 
+## Optional Stretch Features Implemented
+
+This project also includes two extensions that go beyond the base requirement and strengthen the AI system:
+
+- RAG enhancement: the assistant now supports multiple custom knowledge sources instead of relying on a single document, which improves retrieval coverage for pet-care topics.
+- Evaluation harness: [evaluation_harness.py](evaluation_harness.py) runs a predefined set of prompts and prints a pass/fail summary so the system's reliability is easy to measure.
+- Supporting log: [ai_interactions.md](ai_interactions.md) documents the retrieval enhancement and evaluation workflow.
+
 ## Key Takeaways
 
 This project taught me that AI is most useful when it is constrained to a clear problem and grounded in reliable information. In practical terms, I learned how important it is to design around validation, guardrails, and transparency rather than assuming a model will always produce safe or correct answers.
